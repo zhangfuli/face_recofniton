@@ -2,11 +2,11 @@
 
 ##### recognition_from_folder_webcam(path, videoId)
 ###### 参数：path  图片文件夹路径, 默认当前路径; videoId 摄像头号, 默认0
-###### 从文件夹下读取照片并对文件夹内的图片, 进行实时识别并根据文件夹中图片名进行标示
+###### 从文件夹下读取照片并对文件夹内的图片, 进行实时识别并根据文件夹中图片名进行标示, 并生成日志文件
 ###### 例子： recognition_from_folder_webcam("./imgs", 0)
 
 
 ##### romance_video(imgPath, videoPath, frames, framesWidth, framesHeight)
 ###### 参数：imgPath图片文件夹路径, videoPath视频路径, frames帧数, framesWidth帧宽度, framesHeight帧高度
-###### 读取视频，并根据图片文件加夹中的图片进行识别在视频中渲染，结果在output文件夹
+###### 读取视频，并根据图片文件加夹中的图片进行识别在视频中渲染，结果在output文件夹, 并生成日志文件
 ###### 例子：romance_video("./imgs/", "./video.mp4", 25, 1280, 720)

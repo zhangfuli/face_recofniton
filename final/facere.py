@@ -1,53 +1,63 @@
 import face_recognition
 import cv2
 import os
+import logging
 
 def recognition_from_folder_webcam(path = './', videoId = 0):
-    video_capture = cv2.VideoCapture(videoId)
-
+	logging.basicConfig(filename='recognition_from_folder_webcam.log',
+                format='%(asctime)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S %p',
+                level=10)
+	video_capture = cv2.VideoCapture(videoId)
     # 初始化
-    known_face_encodings = []
-    known_face_names = []
+	known_face_encodings = []
+	known_face_names = []
 
-    files= os.listdir(path) #得到文件夹下的所有文件名称
-    for file in files:
-        img_path = path +"/"+ file
-        try:
-        	known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(img_path))[0])
-        except:
-        	print(file + " image not support")
-       	else:
-       		known_face_names.append(file.split('.')[0])
+	files= os.listdir(path) #得到文件夹下的所有文件名称
+	for file in files:
+		img_path = path +"/"+ file
+		try:
+			known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(img_path))[0])
+		except:
+			print(file + " image not support")
+			logging.error(file + " image not support")
+		else:
+			known_face_names.append(file.split('.')[0])
 
-    while True:
-	    ret, frame = video_capture.read()
-	    rgb_frame = frame[:, :, ::-1]
-	    face_locations = face_recognition.face_locations(rgb_frame)
-	    face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+	while True:
+		ret, frame = video_capture.read()
+		rgb_frame = frame[:, :, ::-1]
+		face_locations = face_recognition.face_locations(rgb_frame)
+		face_encodings = face_recognition.face_encodings(rgb_frame, face_locations)
+		
+		for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
+			matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
+			name = "Unknown"
+			if True in matches:
+				first_match_index = matches.index(True)
+				name = known_face_names[first_match_index]
+			cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
+			cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
+			font = cv2.FONT_HERSHEY_DUPLEX
+			cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
+			print(name)
+			logging.info("from video" + str(videoId) + " find " + name)
 	    
-	    for (top, right, bottom, left), face_encoding in zip(face_locations, face_encodings):
-	        matches = face_recognition.compare_faces(known_face_encodings, face_encoding)
-	        name = "Unknown"
-	        if True in matches:
-	            first_match_index = matches.index(True)
-	            name = known_face_names[first_match_index]
-	        
-	        cv2.rectangle(frame, (left, top), (right, bottom), (0, 0, 255), 2)
-	        cv2.rectangle(frame, (left, bottom - 35), (right, bottom), (0, 0, 255), cv2.FILLED)
-	        font = cv2.FONT_HERSHEY_DUPLEX
-	        cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
-	    
-	    cv2.imshow('Video', frame)
-	    if cv2.waitKey(1) & 0xFF == ord('q'):
-        	break
-    video_capture.release()
-    cv2.destroyAllWindows()
+		cv2.imshow('Video', frame)
+		if cv2.waitKey(1) & 0xFF == ord('q'):
+			break
+	video_capture.release()
+	cv2.destroyAllWindows()
 
 
 
 
 
 def romance_video(imgPath = './',videoPath = './test.vi', frames = 25, framesWidth = 720, framesHeight = 404):
+	logging.basicConfig(filename='romance_video.log',
+                format='%(asctime)s - %(levelname)s - %(message)s',
+                datefmt='%Y-%m-%d %H:%M:%S %p',
+                level=10)
 	mkdir("./output")
 	input_movie = cv2.VideoCapture(videoPath)
 	length = int(input_movie.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -69,6 +79,7 @@ def romance_video(imgPath = './',videoPath = './test.vi', frames = 25, framesWid
 			known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(img_path))[0])
 		except:
 			print(file + " image not support")
+			logging.error(file + " image not support")
 		else:
 			known_face_names.append(file.split('.')[0])
 
@@ -105,6 +116,7 @@ def romance_video(imgPath = './',videoPath = './test.vi', frames = 25, framesWid
 			cv2.rectangle(frame, (left, bottom - 25), (right, bottom), (0, 0, 255), cv2.FILLED)
 			font = cv2.FONT_HERSHEY_DUPLEX
 			cv2.putText(frame, name, (left + 6, bottom - 6), font, 0.5, (255, 255, 255), 1)
+			logging.info("from video" + videoPath + " find " + name + " at " + str((datetime.datetime.now() - starttime).seconds) + " s")
 		output_movie.write(frame)
 	endtime = datetime.datetime.now()
 	print(endtime)
